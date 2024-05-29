@@ -1,0 +1,74 @@
+%% PLUTO FM SWEEP TEST
+% Braydon Burkhardt
+
+clear; close all; clc;
+%configurePlutoRadio('AD9364');
+
+% This program sweeps through a range of frequencies as a doppler shift sim
+% A tone is transmitted with a shifting carrier frequency
+
+startingFreq = 845e6;
+endingFreq = 855e6;
+freqIncrement = 100e3; 
+sweepTime = 5;
+toneFreq = 1e6;
+rxFreqMatches = false; %true rx_freq=tx_freq, false rx_freq=mid freq
+
+% ---------------------------------------------------- %
+
+
+fs = 20e6; % sampling freq
+sf = 40000; % samples per frame
+
+% calc amount of increments
+incAmount = (endingFreq-startingFreq)/freqIncrement;
+
+% calc amount of received frames per freq increment
+secPerInc = sweepTime/incAmount;
+frameDuration = sf/fs;
+framesPerInc = secPerInc/frameDuration;
+
+tx_sig = dsp.SineWave;
+tx_sig.Amplitude = 0.5;
+tx_sig.Frequency = toneFreq;
+tx_sig.ComplexOutput = true;
+tx_sig.SampleRate = fs;
+tx_sig.SamplesPerFrame = sf;
+tx_sig_output = tx_sig();
+
+pause(5);
+tx = sdrtx('Pluto'); 
+tx.BasebandSampleRate = fs;
+tx.Gain = 0;
+
+rx = sdrrx('Pluto');
+rx.SamplesPerFrame = sf;
+rx.BasebandSampleRate = fs;
+
+sa = dsp.SpectrumAnalyzer;
+sa.SampleRate = rx.BasebandSampleRate;
+sa.PlotAsTwoSidedSpectrum = true;
+
+while (true)
+    for j=startingFreq:freqIncrement:endingFreq
+    
+        tx.CenterFrequency = j;
+
+        if rxFreqMatches
+            rx.CenterFrequency = j;
+        else
+            rx.CenterFrequency = (startingFreq+endingFreq)/2;
+        end
+    
+        tx.transmitRepeat(tx_sig_output);
+        
+        for k=1:1:framesPerInc
+             sa(rx());
+        end
+    end
+end
+
+% release(tx);
+% release(rx);
+% release(sa);
+
