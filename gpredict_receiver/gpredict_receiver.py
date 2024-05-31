@@ -5,7 +5,8 @@
 # SPDX-License-Identifier: GPL-3.0
 #
 # GNU Radio Python Flow Graph
-# Title: Not titled yet
+# Title: gpredict_receiver
+# Author: Burkhardt, Tinker
 # GNU Radio version: 3.10.9.2
 
 from PyQt5 import Qt
@@ -21,16 +22,17 @@ from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
 from gnuradio import soapy
+import gpredict
 import sip
 
 
 
-class basic_receiver(gr.top_block, Qt.QWidget):
+class gpredict_receiver(gr.top_block, Qt.QWidget):
 
     def __init__(self):
-        gr.top_block.__init__(self, "Not titled yet", catch_exceptions=True)
+        gr.top_block.__init__(self, "gpredict_receiver", catch_exceptions=True)
         Qt.QWidget.__init__(self)
-        self.setWindowTitle("Not titled yet")
+        self.setWindowTitle("gpredict_receiver")
         qtgui.util.check_set_qss()
         try:
             self.setWindowIcon(Qt.QIcon.fromTheme('gnuradio-grc'))
@@ -48,7 +50,7 @@ class basic_receiver(gr.top_block, Qt.QWidget):
         self.top_grid_layout = Qt.QGridLayout()
         self.top_layout.addLayout(self.top_grid_layout)
 
-        self.settings = Qt.QSettings("GNU Radio", "basic_receiver")
+        self.settings = Qt.QSettings("GNU Radio", "gpredict_receiver")
 
         try:
             geometry = self.settings.value("geometry")
@@ -112,6 +114,7 @@ class basic_receiver(gr.top_block, Qt.QWidget):
         self.qtgui_sink_x_0_0_1_0_1_1_0.enable_rf_freq(True)
 
         self.top_layout.addWidget(self._qtgui_sink_x_0_0_1_0_1_1_0_win)
+        self.gpredict_doppler_0 = gpredict.doppler('127.0.0.1', 4532, False)
 
 
         ##################################################
@@ -121,7 +124,7 @@ class basic_receiver(gr.top_block, Qt.QWidget):
 
 
     def closeEvent(self, event):
-        self.settings = Qt.QSettings("GNU Radio", "basic_receiver")
+        self.settings = Qt.QSettings("GNU Radio", "gpredict_receiver")
         self.settings.setValue("geometry", self.saveGeometry())
         self.stop()
         self.wait()
@@ -181,7 +184,7 @@ class basic_receiver(gr.top_block, Qt.QWidget):
 
 
 
-def main(top_block_cls=basic_receiver, options=None):
+def main(top_block_cls=gpredict_receiver, options=None):
 
     qapp = Qt.QApplication(sys.argv)
 
