@@ -42,22 +42,16 @@ fmSampleRate = fs;
 freqDev = 20e3; % 20 kHz 
 tx_sig = fmmod(upsampledAudioIn, fmCarrierFreq, fmSampleRate, freqDev);
 
-size(tx_sig)
-length(tx_sig)
 sf = length(tx_sig); % samples per frame
-if mod(sf, 2)
+
+if mod(sf, 2) % Pluto requires even # of samples / frame
     sf = sf - 1;
     tx_sig = tx_sig(1:length(tx_sig) - 1, 1);
 end
 
-%sf
-%plot_dft_mag(tx_sig, fmSampleRate, 100);
-%figure;
-%spectrogram(tx_sig);
 
 % FM signal is real -- obtain complex, 1-sided analytic representation
 tx_sig_output = hilbert(tx_sig);
-size(tx_sig_output)
 
 % calc amount of increments
 incAmount = (endingFreq-startingFreq)/freqIncrement;
@@ -66,8 +60,8 @@ incAmount = (endingFreq-startingFreq)/freqIncrement;
 secPerInc = sweepTime/incAmount;
 frameDuration = sf/fs;
 framesPerInc = ceil(secPerInc/frameDuration);
-secPerInc
-frameDuration
+%secPerInc
+%frameDuration
 framesPerInc
 
 pause(5);
