@@ -72,7 +72,7 @@ while (true)
 
         tx.CenterFrequency = j;
 
-        writeline(gnu_radio,"F 123456","127.0.0.1",4532);
+        writeline(gnu_radio,"F 0","127.0.0.1","4532)
 
         if rxFreqMatches
             rx.CenterFrequency = j;

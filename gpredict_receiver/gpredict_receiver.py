@@ -11,7 +11,8 @@
 
 from PyQt5 import Qt
 from gnuradio import qtgui
-from PyQt5 import QtCore
+from gnuradio import blocks
+from gnuradio import eng_notation
 from gnuradio import gr
 from gnuradio.filter import firdes
 from gnuradio.fft import window
@@ -20,9 +21,7 @@ import signal
 from PyQt5 import Qt
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
-from gnuradio import eng_notation
-from gnuradio import soapy
-import sip
+import gpredict
 
 
 
@@ -61,131 +60,68 @@ class gpredict_receiver(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
+        self.freq = freq = 850e6
         self.samp_rate = samp_rate = 300e3
         self.gain = gain = 20
-        self.freq = freq = 850e6
-        self.corrected_freq = corrected_freq = 850e6
+        self.correction_mode = correction_mode = 0
+        self.corrected_freq = corrected_freq = freq
         self.bandwidth_rec = bandwidth_rec = 10e6
 
         ##################################################
         # Blocks
         ##################################################
 
-        self._bandwidth_rec_range = qtgui.Range(0, 50e6, 1, 10e6, 200)
-        self._bandwidth_rec_win = qtgui.RangeWidget(self._bandwidth_rec_range, self.set_bandwidth_rec, "'bandwidth_rec'", "counter_slider", float, QtCore.Qt.Horizontal)
-        self.top_layout.addWidget(self._bandwidth_rec_win)
-        self.soapy_limesdr_source_0 = None
-        dev = 'driver=lime'
-        stream_args = ''
-        tune_args = ['']
-        settings = ['']
-
-        self.soapy_limesdr_source_0 = soapy.source(dev, "fc32", 1, '',
-                                  stream_args, tune_args, settings)
-        self.soapy_limesdr_source_0.set_sample_rate(0, samp_rate)
-        self.soapy_limesdr_source_0.set_bandwidth(0, bandwidth_rec)
-        self.soapy_limesdr_source_0.set_frequency(0, freq)
-        self.soapy_limesdr_source_0.set_frequency_correction(0, 0)
-        self.soapy_limesdr_source_0.set_gain(0, min(max(gain, -12.0), 61.0))
-        self.qtgui_freq_sink_x_0_1_1_0 = qtgui.freq_sink_c(
-            1024, #size
-            window.WIN_BLACKMAN_hARRIS, #wintype
-            corrected_freq, #fc
-            samp_rate, #bw
-            "rx_corrected", #name
-            1,
-            None # parent
-        )
-        self.qtgui_freq_sink_x_0_1_1_0.set_update_time(0.01)
-        self.qtgui_freq_sink_x_0_1_1_0.set_y_axis((-140), 10)
-        self.qtgui_freq_sink_x_0_1_1_0.set_y_label('Relative Gain', 'dB')
-        self.qtgui_freq_sink_x_0_1_1_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, 0.0, 0, "")
-        self.qtgui_freq_sink_x_0_1_1_0.enable_autoscale(False)
-        self.qtgui_freq_sink_x_0_1_1_0.enable_grid(False)
-        self.qtgui_freq_sink_x_0_1_1_0.set_fft_average(1.0)
-        self.qtgui_freq_sink_x_0_1_1_0.enable_axis_labels(True)
-        self.qtgui_freq_sink_x_0_1_1_0.enable_control_panel(False)
-        self.qtgui_freq_sink_x_0_1_1_0.set_fft_window_normalized(False)
-
-
-
-        labels = ['', '', '', '', '',
-            '', '', '', '', '']
-        widths = [1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1]
-        colors = ["blue", "red", "green", "black", "cyan",
-            "magenta", "yellow", "dark red", "dark green", "dark blue"]
-        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0, 1.0]
-
-        for i in range(1):
-            if len(labels[i]) == 0:
-                self.qtgui_freq_sink_x_0_1_1_0.set_line_label(i, "Data {0}".format(i))
-            else:
-                self.qtgui_freq_sink_x_0_1_1_0.set_line_label(i, labels[i])
-            self.qtgui_freq_sink_x_0_1_1_0.set_line_width(i, widths[i])
-            self.qtgui_freq_sink_x_0_1_1_0.set_line_color(i, colors[i])
-            self.qtgui_freq_sink_x_0_1_1_0.set_line_alpha(i, alphas[i])
-
-        self._qtgui_freq_sink_x_0_1_1_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0_1_1_0.qwidget(), Qt.QWidget)
-        self.top_grid_layout.addWidget(self._qtgui_freq_sink_x_0_1_1_0_win, 0, 1, 1, 1)
-        for r in range(0, 1):
-            self.top_grid_layout.setRowStretch(r, 1)
-        for c in range(1, 2):
-            self.top_grid_layout.setColumnStretch(c, 1)
-        self.qtgui_freq_sink_x_0_1_1 = qtgui.freq_sink_c(
-            1024, #size
-            window.WIN_BLACKMAN_hARRIS, #wintype
-            freq, #fc
-            samp_rate, #bw
-            "rx_not-corrected", #name
-            1,
-            None # parent
-        )
-        self.qtgui_freq_sink_x_0_1_1.set_update_time(0.01)
-        self.qtgui_freq_sink_x_0_1_1.set_y_axis((-140), 10)
-        self.qtgui_freq_sink_x_0_1_1.set_y_label('Relative Gain', 'dB')
-        self.qtgui_freq_sink_x_0_1_1.set_trigger_mode(qtgui.TRIG_MODE_FREE, 0.0, 0, "")
-        self.qtgui_freq_sink_x_0_1_1.enable_autoscale(False)
-        self.qtgui_freq_sink_x_0_1_1.enable_grid(False)
-        self.qtgui_freq_sink_x_0_1_1.set_fft_average(1.0)
-        self.qtgui_freq_sink_x_0_1_1.enable_axis_labels(True)
-        self.qtgui_freq_sink_x_0_1_1.enable_control_panel(False)
-        self.qtgui_freq_sink_x_0_1_1.set_fft_window_normalized(False)
-
-
-
-        labels = ['', '', '', '', '',
-            '', '', '', '', '']
-        widths = [1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1]
-        colors = ["blue", "red", "green", "black", "cyan",
-            "magenta", "yellow", "dark red", "dark green", "dark blue"]
-        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0, 1.0]
-
-        for i in range(1):
-            if len(labels[i]) == 0:
-                self.qtgui_freq_sink_x_0_1_1.set_line_label(i, "Data {0}".format(i))
-            else:
-                self.qtgui_freq_sink_x_0_1_1.set_line_label(i, labels[i])
-            self.qtgui_freq_sink_x_0_1_1.set_line_width(i, widths[i])
-            self.qtgui_freq_sink_x_0_1_1.set_line_color(i, colors[i])
-            self.qtgui_freq_sink_x_0_1_1.set_line_alpha(i, alphas[i])
-
-        self._qtgui_freq_sink_x_0_1_1_win = sip.wrapinstance(self.qtgui_freq_sink_x_0_1_1.qwidget(), Qt.QWidget)
-        self.top_grid_layout.addWidget(self._qtgui_freq_sink_x_0_1_1_win, 0, 0, 1, 1)
-        for r in range(0, 1):
+        self._samp_rate_tool_bar = Qt.QToolBar(self)
+        self._samp_rate_tool_bar.addWidget(Qt.QLabel("Sample Rate" + ": "))
+        self._samp_rate_line_edit = Qt.QLineEdit(str(self.samp_rate))
+        self._samp_rate_tool_bar.addWidget(self._samp_rate_line_edit)
+        self._samp_rate_line_edit.editingFinished.connect(
+            lambda: self.set_samp_rate(eng_notation.str_to_num(str(self._samp_rate_line_edit.text()))))
+        self.top_grid_layout.addWidget(self._samp_rate_tool_bar, 2, 0, 1, 1)
+        for r in range(2, 3):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(0, 1):
             self.top_grid_layout.setColumnStretch(c, 1)
+        self.gpredict_doppler_0 = gpredict.doppler('127.0.0.1', 4532, True)
+        self._gain_tool_bar = Qt.QToolBar(self)
+        self._gain_tool_bar.addWidget(Qt.QLabel("RX Gain" + ": "))
+        self._gain_line_edit = Qt.QLineEdit(str(self.gain))
+        self._gain_tool_bar.addWidget(self._gain_line_edit)
+        self._gain_line_edit.editingFinished.connect(
+            lambda: self.set_gain(eng_notation.str_to_num(str(self._gain_line_edit.text()))))
+        self.top_grid_layout.addWidget(self._gain_tool_bar, 3, 0, 1, 1)
+        for r in range(3, 4):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(0, 1):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self._freq_tool_bar = Qt.QToolBar(self)
+        self._freq_tool_bar.addWidget(Qt.QLabel("Carrier Frequency" + ": "))
+        self._freq_line_edit = Qt.QLineEdit(str(self.freq))
+        self._freq_tool_bar.addWidget(self._freq_line_edit)
+        self._freq_line_edit.editingFinished.connect(
+            lambda: self.set_freq(eng_notation.str_to_num(str(self._freq_line_edit.text()))))
+        self.top_grid_layout.addWidget(self._freq_tool_bar, 1, 0, 1, 1)
+        for r in range(1, 2):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(0, 1):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self._correction_mode_choices = {'Pressed': bool(1), 'Released': bool(0)}
+
+        _correction_mode_toggle_switch = qtgui.GrToggleSwitch(self.set_correction_mode, 'GPredict Enable', self._correction_mode_choices, False, "green", "gray", 4, 50, 1, 1, self, 'value')
+        self.correction_mode = _correction_mode_toggle_switch
+
+        self.top_grid_layout.addWidget(_correction_mode_toggle_switch, 4, 0, 1, 1)
+        for r in range(4, 5):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(0, 1):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self.blocks_msgpair_to_var_0 = blocks.msg_pair_to_var(self.set_corrected_freq)
 
 
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.soapy_limesdr_source_0, 0), (self.qtgui_freq_sink_x_0_1_1, 0))
-        self.connect((self.soapy_limesdr_source_0, 0), (self.qtgui_freq_sink_x_0_1_1_0, 0))
+        self.msg_connect((self.gpredict_doppler_0, 'freq'), (self.blocks_msgpair_to_var_0, 'inpair'))
 
 
     def closeEvent(self, event):
@@ -196,43 +132,45 @@ class gpredict_receiver(gr.top_block, Qt.QWidget):
 
         event.accept()
 
+    def get_freq(self):
+        return self.freq
+
+    def set_freq(self, freq):
+        self.freq = freq
+        self.set_corrected_freq(self.freq)
+        Qt.QMetaObject.invokeMethod(self._freq_line_edit, "setText", Qt.Q_ARG("QString", eng_notation.num_to_str(self.freq)))
+
     def get_samp_rate(self):
         return self.samp_rate
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.qtgui_freq_sink_x_0_1_1.set_frequency_range(self.freq, self.samp_rate)
-        self.qtgui_freq_sink_x_0_1_1_0.set_frequency_range(self.corrected_freq, self.samp_rate)
-        self.soapy_limesdr_source_0.set_sample_rate(0, self.samp_rate)
+        Qt.QMetaObject.invokeMethod(self._samp_rate_line_edit, "setText", Qt.Q_ARG("QString", eng_notation.num_to_str(self.samp_rate)))
 
     def get_gain(self):
         return self.gain
 
     def set_gain(self, gain):
         self.gain = gain
-        self.soapy_limesdr_source_0.set_gain(0, min(max(self.gain, -12.0), 61.0))
+        Qt.QMetaObject.invokeMethod(self._gain_line_edit, "setText", Qt.Q_ARG("QString", eng_notation.num_to_str(self.gain)))
 
-    def get_freq(self):
-        return self.freq
+    def get_correction_mode(self):
+        return self.correction_mode
 
-    def set_freq(self, freq):
-        self.freq = freq
-        self.qtgui_freq_sink_x_0_1_1.set_frequency_range(self.freq, self.samp_rate)
-        self.soapy_limesdr_source_0.set_frequency(0, self.freq)
+    def set_correction_mode(self, correction_mode):
+        self.correction_mode = correction_mode
 
     def get_corrected_freq(self):
         return self.corrected_freq
 
     def set_corrected_freq(self, corrected_freq):
         self.corrected_freq = corrected_freq
-        self.qtgui_freq_sink_x_0_1_1_0.set_frequency_range(self.corrected_freq, self.samp_rate)
 
     def get_bandwidth_rec(self):
         return self.bandwidth_rec
 
     def set_bandwidth_rec(self, bandwidth_rec):
         self.bandwidth_rec = bandwidth_rec
-        self.soapy_limesdr_source_0.set_bandwidth(0, self.bandwidth_rec)
 
 
 

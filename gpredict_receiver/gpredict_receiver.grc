@@ -34,60 +34,83 @@ options:
 
 blocks:
 - name: bandwidth_rec
-  id: variable_qtgui_range
+  id: variable
   parameters:
     comment: ''
-    gui_hint: ''
-    label: ''
-    min_len: '200'
-    orient: QtCore.Qt.Horizontal
-    rangeType: float
-    start: '0'
-    step: '1'
-    stop: 50e6
     value: 10e6
-    widget: counter_slider
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [488, 16.0]
+    coordinate: [56, 112.0]
     rotation: 0
     state: enabled
 - name: corrected_freq
   id: variable
   parameters:
     comment: ''
-    value: 850e6
+    value: freq
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [288, 88.0]
+    coordinate: [304, 96.0]
+    rotation: 0
+    state: enabled
+- name: correction_mode
+  id: variable_qtgui_toggle_switch
+  parameters:
+    cellalignment: '1'
+    comment: ''
+    gui_hint: 4,0
+    initPressed: 'False'
+    label: GPredict Enable
+    outputmsgname: value
+    position: '4'
+    pressed: '1'
+    released: '0'
+    switchOffBackground: gray
+    switchOnBackground: green
+    type: bool
+    value: '0'
+    verticalalignment: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [440, 8.0]
     rotation: 0
     state: enabled
 - name: freq
-  id: variable
+  id: variable_qtgui_entry
   parameters:
     comment: ''
+    entry_signal: editingFinished
+    gui_hint: 1,0
+    label: Carrier Frequency
+    type: real
     value: 850e6
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [288, 16.0]
+    coordinate: [304, 8.0]
     rotation: 0
     state: enabled
 - name: gain
-  id: variable
+  id: variable_qtgui_entry
   parameters:
     comment: ''
+    entry_signal: editingFinished
+    gui_hint: 3,0
+    label: RX Gain
+    type: real
     value: '20'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [424, 16.0]
+    coordinate: [176, 96.0]
     rotation: 0
     state: enabled
 - name: lowpass_custom_taps
@@ -109,15 +132,19 @@ blocks:
     rotation: 0
     state: disabled
 - name: samp_rate
-  id: variable
+  id: variable_qtgui_entry
   parameters:
     comment: ''
+    entry_signal: editingFinished
+    gui_hint: 2,0
+    label: Sample Rate
+    type: real
     value: 300e3
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [184, 16.0]
+    coordinate: [176, 8.0]
     rotation: 0
     state: enabled
 - name: taps_cutoff
@@ -173,9 +200,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1352, 344.0]
+    coordinate: [1256, 336.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: freq_xlating_fft_filter_ccc_0
   id: freq_xlating_fft_filter_ccc
   parameters:
@@ -194,7 +221,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [448, 608.0]
+    coordinate: [440, 672.0]
     rotation: 0
     state: disabled
 - name: freq_xlating_fft_filter_ccc_0_0
@@ -215,7 +242,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [448, 448.0]
+    coordinate: [440, 512.0]
     rotation: 0
     state: disabled
 - name: gpredict_doppler_0
@@ -233,9 +260,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1088, 352.0]
+    coordinate: [992, 344.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: qtgui_freq_sink_x_0_1
   id: qtgui_freq_sink_x
   parameters:
@@ -314,7 +341,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [720, 456.0]
+    coordinate: [712, 520.0]
     rotation: 0
     state: disabled
 - name: qtgui_freq_sink_x_0_1_0
@@ -395,7 +422,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [720, 616.0]
+    coordinate: [712, 680.0]
     rotation: 0
     state: disabled
 - name: qtgui_freq_sink_x_0_1_1
@@ -433,7 +460,7 @@ blocks:
     fftsize: '1024'
     freqhalf: 'True'
     grid: 'False'
-    gui_hint: 0,0
+    gui_hint: 5,0
     label: Relative Gain
     label1: ''
     label10: ''''''
@@ -476,9 +503,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [728, 208.0]
+    coordinate: [720, 272.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: qtgui_freq_sink_x_0_1_1_0
   id: qtgui_freq_sink_x
   parameters:
@@ -514,7 +541,7 @@ blocks:
     fftsize: '1024'
     freqhalf: 'True'
     grid: 'False'
-    gui_hint: 0,1
+    gui_hint: 6,0
     label: Relative Gain
     label1: ''
     label10: ''''''
@@ -557,9 +584,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [728, 328.0]
+    coordinate: [720, 392.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: soapy_limesdr_source_0
   id: soapy_limesdr_source
   parameters:
@@ -579,9 +606,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [152, 280.0]
+    coordinate: [56, 288.0]
     rotation: 0
-    state: enabled
+    state: disabled
 
 connections:
 - [freq_xlating_fft_filter_ccc_0, '0', qtgui_freq_sink_x_0_1_0, '0']
