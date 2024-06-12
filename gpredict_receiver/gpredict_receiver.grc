@@ -46,39 +46,19 @@ blocks:
     rotation: 0
     state: enabled
 - name: corrected_freq
-  id: variable
+  id: variable_qtgui_entry
   parameters:
     comment: ''
-    value: freq
+    entry_signal: editingFinished
+    gui_hint: 2,0
+    label: Carrier Frequency - Corrected
+    type: real
+    value: 850e6
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
     coordinate: [304, 96.0]
-    rotation: 0
-    state: enabled
-- name: correction_mode
-  id: variable_qtgui_toggle_switch
-  parameters:
-    cellalignment: '1'
-    comment: ''
-    gui_hint: 4,0
-    initPressed: 'False'
-    label: GPredict Enable
-    outputmsgname: value
-    position: '4'
-    pressed: '1'
-    released: '0'
-    switchOffBackground: gray
-    switchOnBackground: green
-    type: bool
-    value: '0'
-    verticalalignment: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [440, 8.0]
     rotation: 0
     state: enabled
 - name: freq
@@ -102,7 +82,7 @@ blocks:
   parameters:
     comment: ''
     entry_signal: editingFinished
-    gui_hint: 3,0
+    gui_hint: 4,0
     label: RX Gain
     type: real
     value: '20'
@@ -136,7 +116,7 @@ blocks:
   parameters:
     comment: ''
     entry_signal: editingFinished
-    gui_hint: 2,0
+    gui_hint: 3,0
     label: Sample Rate
     type: real
     value: 300e3
@@ -260,7 +240,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [992, 344.0]
+    coordinate: [416, 400.0]
     rotation: 0
     state: enabled
 - name: qtgui_freq_sink_x_0_1
@@ -505,7 +485,7 @@ blocks:
     bus_structure: null
     coordinate: [720, 272.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: qtgui_freq_sink_x_0_1_1_0
   id: qtgui_freq_sink_x
   parameters:
@@ -559,7 +539,7 @@ blocks:
     name: '"rx_corrected"'
     nconnections: '1'
     norm_window: 'False'
-    showports: 'False'
+    showports: 'True'
     tr_chan: '0'
     tr_level: '0.0'
     tr_mode: qtgui.TRIG_MODE_FREE
@@ -584,9 +564,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [720, 392.0]
+    coordinate: [720, 384.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: soapy_limesdr_source_0
   id: soapy_limesdr_source
   parameters:
@@ -608,12 +588,13 @@ blocks:
     bus_structure: null
     coordinate: [56, 288.0]
     rotation: 0
-    state: disabled
+    state: enabled
 
 connections:
 - [freq_xlating_fft_filter_ccc_0, '0', qtgui_freq_sink_x_0_1_0, '0']
 - [freq_xlating_fft_filter_ccc_0_0, '0', qtgui_freq_sink_x_0_1, '0']
 - [gpredict_doppler_0, freq, blocks_msgpair_to_var_0, inpair]
+- [gpredict_doppler_0, freq, qtgui_freq_sink_x_0_1_1_0, freq]
 - [soapy_limesdr_source_0, '0', freq_xlating_fft_filter_ccc_0, '0']
 - [soapy_limesdr_source_0, '0', freq_xlating_fft_filter_ccc_0_0, '0']
 - [soapy_limesdr_source_0, '0', qtgui_freq_sink_x_0_1_1, '0']

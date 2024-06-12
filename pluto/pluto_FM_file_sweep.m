@@ -65,14 +65,14 @@ sa.SampleRate = rx.BasebandSampleRate;
 sa.PlotAsTwoSidedSpectrum = true;
 
 % connect to GnuRadio UDP socket
-gnu_radio = udpport("LocalHost","127.0.0.1","LocalPort",4532);
+gnu_radio = tcpclient("127.0.0.1",4532);
 
 while (true)
     for j=startingFreq:freqIncrement:endingFreq
 
         tx.CenterFrequency = j;
 
-        writeline(gnu_radio,"F 123456","127.0.0.1",4532);
+        writeline(gnu_radio,strcat('F ', num2str(j)));
 
         if rxFreqMatches
             rx.CenterFrequency = j;
