@@ -7,8 +7,8 @@ clear; close all; clc;
 
 startingFreq = 849.95e6;
 endingFreq = 850.05e6;
-freqIncrement = 1e3; 
-sweepTime = 10;
+freqIncrement = 10e3; 
+sweepTime = 20;
 rxFreqMatches = false; %true rx_freq=tx_freq, false rx_freq=mid freq
 
 % ---------------------------------------------------- %;
@@ -41,7 +41,14 @@ end
 
 
 % FM signal is real -- obtain complex, 1-sided analytic representation
-tx_sig_output = hilbert(tx_sig);
+tx_sig = dsp.SineWave;
+tx_sig.Amplitude = 0.5;
+tx_sig.Frequency = 50e3;
+tx_sig.ComplexOutput = true;
+tx_sig.SampleRate = fs;
+tx_sig.SamplesPerFrame = sf;
+tx_sig_output = tx_sig();
+% tx_sig_output = hilbert(tx_sig);
 
 % calc amount of increments
 incAmount = (endingFreq-startingFreq)/freqIncrement;
@@ -65,14 +72,22 @@ sa.SampleRate = rx.BasebandSampleRate;
 sa.PlotAsTwoSidedSpectrum = true;
 
 % connect to GnuRadio UDP socket
-gnu_radio = tcpclient("127.0.0.1",4532);
+try gnu_radio = tcpclient("127.0.0.1",4532);
+catch 
+end
 
 while (true)
     for j=startingFreq:freqIncrement:endingFreq
-
+        
         tx.CenterFrequency = j;
 
-        writeline(gnu_radio,strcat('F ', num2str(j)));
+        % try to send an updated frequency to gnu-radio
+        try writeline(gnu_radio,strcat('F ', num2str(j)));
+        catch
+            try gnu_radio = tcpclient("127.0.0.1",4532);
+            catch 
+            end
+        end
 
         if rxFreqMatches
             rx.CenterFrequency = j;
